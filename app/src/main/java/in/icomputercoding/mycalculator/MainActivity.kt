@@ -1,140 +1,115 @@
 package `in`.icomputercoding.mycalculator
 
+import `in`.icomputercoding.mycalculator.databinding.ActivityMainBinding
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import net.objecthunter.exp4j.ExpressionBuilder
 
 class MainActivity : AppCompatActivity() {
 
-
-    private var tvInput: TextView? = null
-    private var lastDot: Boolean = false
-    private var lastNumeric: Boolean = false
+    private lateinit var binding: ActivityMainBinding
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        tvInput = findViewById(R.id.Input)
-
-
-    }
-
-    fun onDigit(view: View) {
-        tvInput?.append((view as Button).text)
-        lastNumeric = true
-        lastDot = false
-    }
-
-    fun onClear(view: View) {
-        tvInput?.text = ""
-    }
-
-    fun onDecimalPoint(view: View) {
-        if (lastNumeric && !lastDot) {
-            tvInput?.append(".")
-            lastNumeric = false
-            lastDot = true
+        binding.BtnClear.setOnClickListener {
+            binding.Input.text = ""
+            binding.result.text = ""
         }
-    }
 
-    fun onOperator(view: View) {
-        tvInput?.text.let {
-            if (lastNumeric && !isOperatorAdded(it.toString())) {
-                tvInput?.append((view as Button).text)
-                lastNumeric = false
-                lastDot = false
+        binding.BtnZero.setOnClickListener {
+            evaluateExpression("0",true)
+        }
+
+        binding.BtnZero2.setOnClickListener {
+            evaluateExpression("00",true)
+        }
+
+        binding.BtnOne.setOnClickListener {
+            evaluateExpression("1",true)
+        }
+
+        binding.BtnTwo.setOnClickListener {
+            evaluateExpression("2",true)
+        }
+
+        binding.BtnThree.setOnClickListener {
+            evaluateExpression("3",true)
+        }
+
+        binding.BtnFour.setOnClickListener {
+            evaluateExpression("4",true)
+        }
+
+        binding.BtnFive.setOnClickListener {
+            evaluateExpression("5",true)
+        }
+
+        binding.BtnSix.setOnClickListener {
+            evaluateExpression("6",true)
+        }
+
+        binding.BtnSeven.setOnClickListener {
+            evaluateExpression("7",true)
+        }
+
+        binding.BtnEight.setOnClickListener {
+            evaluateExpression("8",true)
+        }
+
+        binding.BtnNine.setOnClickListener {
+            evaluateExpression("9",true)
+        }
+
+
+        binding.BtnDot.setOnClickListener {
+            evaluateExpression(".",true)
+        }
+
+        binding.BtnPlus.setOnClickListener{
+            evaluateExpression("+",true)
+        }
+
+        binding.BtnMinus.setOnClickListener{
+            evaluateExpression("-",true)
+        }
+
+        binding.BtnMultiply.setOnClickListener{
+            evaluateExpression("*", true)
+        }
+
+        binding.BtnDivide.setOnClickListener {
+            evaluateExpression("/", true)
+        }
+
+        binding.BtnAns.setOnClickListener {
+            val text = binding.Input.text.toString()
+            val expression = ExpressionBuilder(text).build()
+
+            val result = expression.evaluate()
+            val longResult = result.toLong()
+            if (result == longResult.toDouble()) {
+                binding.result.text = longResult.toString()
+            } else {
+                binding.result.text = result.toString()
             }
         }
+
+
     }
 
-    fun onEqual(view: View) {
-        if (lastNumeric) {
-            var tvValue = tvInput?.text.toString()
-            var prefix = ""
-            try {
-                if (tvValue.startsWith("-")) {
-                    prefix = "-"
-                    tvValue = tvValue.substring(1)
-                }
-                when {
-                    tvValue.contains("/") -> {
-                        val splitedValue = tvValue.split("/")
 
-                        var one = splitedValue[0]
-                        val two = splitedValue[1]
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        tvInput?.text =
-                            removeZeroAfterDot((one.toDouble() / two.toDouble()).toString())
-                    }
-                    tvValue.contains("X") -> {
-                        val splitedValue = tvValue.split("X")
-
-                        var one = splitedValue[0]
-                        val two = splitedValue[1]
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        tvInput?.text =
-                            removeZeroAfterDot((one.toDouble() * two.toDouble()).toString())
-                    }
-                    tvValue.contains("-") -> {
-                        val splitedValue = tvValue.split("-")
-
-                        var one = splitedValue[0]
-                        val two = splitedValue[1]
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        tvInput?.text =
-                            removeZeroAfterDot((one.toDouble() - two.toDouble()).toString())
-                    }
-                    tvValue.contains("+") -> {
-                        val splitedValue = tvValue.split("+")
-
-                        var one = splitedValue[0]
-                        val two = splitedValue[1]
-
-                        if (prefix.isNotEmpty()) {
-                            one = prefix + one
-                        }
-                        tvInput?.text =
-                            removeZeroAfterDot((one.toDouble() + two.toDouble()).toString())
-                    }
-                }
-            } catch (e: ArithmeticException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun removeZeroAfterDot(result: String): String {
-
-        var value = result
-
-        if (result.contains(".0")) {
-            value = result.substring(0, result.length - 2)
-        }
-
-        return value
-    }
-
-    private fun isOperatorAdded(value: String): Boolean {
-        return if (value.startsWith("-")) {
-            return false
+    private fun evaluateExpression(string: String, clear: Boolean) {
+        if(clear) {
+            binding.result.text = ""
+            binding.Input.append(string)
         } else {
-            value.contains("/")
-                    || value.contains("X")
-                    || value.contains("-")
-                    || value.contains("+")
+            binding.Input.append(binding.result.text)
+            binding.Input.append(string)
+            binding.result.text = ""
         }
     }
 
